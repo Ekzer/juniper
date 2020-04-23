@@ -255,6 +255,118 @@ macro_rules! graphql_interface {
                 }
             }
         );
+
+        $crate::__juniper_impl_trait!(
+            impl<$($scalar)* $(, $lifetimes)* > GraphQLTypeAsync for $name where (
+                    Self: $crate::GraphQLType<$crate::__juniper_insert_generic!($($scalar)+)> + Send + Sync,
+                    Self::Context: Send + Sync,
+                    Self::TypeInfo: Send + Sync,
+                )
+               {
+                #[allow(unused_variables)]
+                fn resolve_field_async<'__b>(
+                    &'__b $main_self,
+                    info: &'__b Self::TypeInfo,
+                    field: &'__b str,
+                    args: &'__b $crate::Arguments<$crate::__juniper_insert_generic!($($scalar)+)>,
+                    executor: &'__b $crate::Executor<Self::Context, $crate::__juniper_insert_generic!($($scalar)+)>
+                ) -> $crate::BoxFuture<'__b, $crate::ExecutionResult<$crate::__juniper_insert_generic!($($scalar)+)>>
+                where
+                     $crate::__juniper_insert_generic!($($scalar)+): Send + Sync,
+                 {
+                    use $crate::GraphQLType;
+                    let v = $main_self.resolve_field(info, field, args, executor);
+                    Box::pin(futures::future::ready(v))
+                }
+            }
+        );
+        /*$crate::__juniper_impl_trait!(
+            impl<$($scalar)* $(, $lifetimes)* > GraphQLTypeAsync for $name
+            {
+                /*fn resolve_into_type_async<$($lifetimes)? >(
+                    &$($lifetimes)? $main_self,
+                    info: &$($lifetimes)? Self::TypeInfo,
+                    type_name: &str,
+                    _: Option<$($lifetimes)? [$crate::Selection<$($lifetimes,)? $crate::__juniper_insert_generic!($($scalar)*)>]>,
+                    executor: &$($lifetimes)? $crate::Executor<$($lifetimes,)? $($lifetimes,)? Self::Context, $crate::__juniper_insert_generic!($($scalar)*)>,
+                 ) -> $crate::BoxFuture<$($lifetimes,)? $crate::ExecutionResult<$crate::__juniper_insert_generic!($($scalar)*)>> {
+                     $(let $resolver_ctx = &executor.context();)*
+
+                     $(
+                        if type_name == (<$resolver_src as $crate::GraphQLType<_>>::name(&())).unwrap() {
+                            return executor.resolve_async(&(), &$resolver_expr);
+                        }
+                    )*
+
+                    panic!("Concrete type not handled by instance resolvers on {}", $($outname)*);
+                 }*/
+            }
+        );*/
+        /*$crate::__juniper_impl_trait!(
+            impl<$($scalar)* $(, $lifetimes)* > GraphQLTypeAsync for $name {
+                fn resolve_into_type_async<$($lifetimes)* >(
+                    &$($lifetimes)* $main_self,
+                    info: &$($lifetimes)* Self::TypeInfo,
+                    type_name: &str,
+                    _: Option<'___a, [$crate::Selection<'___a, $crate::__juniper_insert_generic!($($scalar)*)>]>,
+                    executor: &'___a $crate::Executor<'___a, '___a, Self::Context, $crate::__juniper_insert_generic!($($scalar)*)>,
+                 ) -> $crate::BoxFuture<'___a, $crate::ExecutionResult<$crate::__juniper_insert_generic!($($scalar)*)>> {
+                     $(let $resolver_ctx = &executor.context();)*
+
+                     $(
+                        if type_name == (<$resolver_src as $crate::GraphQLType<_>>::name(&())).unwrap() {
+                            return executor.resolve_async(&(), &$resolver_expr);
+                        }
+                    )*
+
+                    panic!("Concrete type not handled by instance resolvers on {}", $($outname)*);
+                 }
+
+                 #[allow(unused_variables)]
+                 fn resolve_field_async<'___a>(
+                    &'___a $main_self,
+                    _info: &'___a Self::TypeInfo,
+                    _field_name: &'___a str,
+                    _arguments: &'___a $crate::Arguments<$crate::__juniper_insert_generic!($($scalar)+)>,
+                    _executor: &'___a $crate::Executor<Self::Context, $crate::__juniper_insert_generic!($($scalar)+)>,
+                    ) -> $crate::BoxFuture<'___a, $crate::ExecutionResult<$crate::__juniper_insert_generic!($($scalar)+)>> {
+                    $(
+                        if _field_name == &$crate::to_camel_case(stringify!($fn_name)) {
+                            return Box::pin(async move {
+                                let f = (|| {
+                                    $(
+                                        let $arg_name: $arg_ty = args.get(&$crate::to_camel_case(stringify!($arg_name)))
+                                            .expect(concat!(
+                                                "Argument ",
+                                                stringify!($arg_name),
+                                                " missing - validation must have failed"
+                                            ));
+                                    )*
+                                    $(
+                                        let $executor = &_executor;
+                                    )*
+                                    $body
+                                });
+
+                                let result: $return_ty = f();
+                                let resolve = $crate::IntoResolvable::into(result, _executor.context());
+                                match resolve {
+                                            Ok(Some((ctx, r))) => {
+                                                _executor.replaced_context(ctx)
+                                                    .resolve_with_ctx_async(&(), &r)
+                                                    .await
+                                            },
+                                            Ok(None) => Ok($crate::Value::null()),
+                                            Err(e) => Err(e)
+                                        }
+                            });
+                        }
+                    )*
+
+                    panic!("Field {} not found on type {}", _field_name, $($outname)*)
+                }
+            }
+        );*/
     };
 
     (

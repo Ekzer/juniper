@@ -115,14 +115,13 @@ graphql_interface!(ResolversWithTrailingComma: () |&self| {
 
 #[crate::graphql_object_internal(
     // FIXME: make async work
-    noasync
 )]
 impl<'a> Root {
     fn custom_name() -> CustomName {
         CustomName {}
     }
 
-    fn with_lifetime() -> WithLifetime<'a> {
+    async fn with_lifetime() -> WithLifetime<'a> {
         WithLifetime { data: PhantomData }
     }
     fn with_generics() -> WithGenerics<i32> {
@@ -253,6 +252,7 @@ async fn introspect_with_generics() {
     })
     .await;
 }
+
 
 #[tokio::test]
 async fn introspect_description_first() {
