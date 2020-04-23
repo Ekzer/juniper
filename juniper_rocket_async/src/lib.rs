@@ -65,14 +65,17 @@ use juniper::{
 #[derive(Debug, PartialEq)]
 pub struct GraphQLRequest<S = DefaultScalarValue>(GraphQLBatchRequest<S>)
 where
-    S: ScalarValue + Send + Sync;
+    S: ScalarValue;
 
 /// Simple wrapper around the result of executing a GraphQL query
 pub struct GraphQLResponse(pub Status, pub String);
 
 /// Generate an HTML page containing GraphiQL
 pub fn graphiql_source(graphql_endpoint_url: &str) -> content::Html<String> {
-    content::Html(juniper::graphiql::graphiql_source(graphql_endpoint_url))
+    content::Html(juniper::http::graphiql::graphiql_source(
+        graphql_endpoint_url,
+        None,
+    ))
 }
 
 /// Generate an HTML page containing GraphQL Playground
@@ -85,9 +88,9 @@ pub fn playground_source(graphql_endpoint_url: &str) -> content::Html<String> {
 
 impl<S> GraphQLRequest<S>
 where
-    S: ScalarValue + Sync + Send,
+    S: ScalarValue,
 {
-    /// Execute an incoming GraphQL query synchronously.
+    /// Synchronously execute an incoming GraphQL query.
     pub fn execute_sync<CtxT, QueryT, MutationT, SubscriptionT>(
         &self,
         root_node: &RootNode<QueryT, MutationT, SubscriptionT, S>,
@@ -97,8 +100,6 @@ where
         QueryT: GraphQLType<S, Context = CtxT>,
         MutationT: GraphQLType<S, Context = CtxT>,
         SubscriptionT: GraphQLType<S, Context = CtxT>,
-        SubscriptionT::TypeInfo: Send + Sync,
-        CtxT: Send + Sync,
     {
         let response = self.0.execute_sync(root_node, context);
         let status = if response.is_ok() {
@@ -111,7 +112,7 @@ where
         GraphQLResponse(status, json)
     }
 
-    /// Asynchronously execute an incoming GraphQL query
+    /// Asynchronously execute an incoming GraphQL query.
     pub async fn execute<CtxT, QueryT, MutationT, SubscriptionT>(
         &self,
         root_node: &RootNode<'_, QueryT, MutationT, SubscriptionT, S>,

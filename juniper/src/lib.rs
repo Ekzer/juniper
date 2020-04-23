@@ -115,15 +115,16 @@ extern crate bson;
 // This allows users to just depend on juniper and get the derive
 // functionality automatically.
 pub use juniper_codegen::{
-    graphql_object, graphql_subscription, graphql_union, GraphQLEnum, GraphQLInputObject,
-    GraphQLObject, GraphQLScalarValue,
+    graphql_object, graphql_scalar, graphql_subscription, graphql_union, GraphQLEnum,
+    GraphQLInputObject, GraphQLObject, GraphQLScalarValue, GraphQLUnion,
 };
 // Internal macros are not exported,
 // but declared at the root to make them easier to use.
 #[allow(unused_imports)]
 use juniper_codegen::{
-    graphql_object_internal, graphql_subscription_internal, graphql_union_internal,
-    GraphQLEnumInternal, GraphQLInputObjectInternal, GraphQLScalarValueInternal,
+    graphql_object_internal, graphql_scalar_internal, graphql_subscription_internal,
+    graphql_union_internal, GraphQLEnumInternal, GraphQLInputObjectInternal,
+    GraphQLScalarValueInternal,
 };
 
 #[macro_use]
@@ -142,8 +143,6 @@ mod validation;
 // https://github.com/rust-lang/cargo/issues/1520
 pub mod http;
 pub mod integrations;
-// TODO: remove this alias export in 0.10. (breaking change)
-pub use crate::http::graphiql;
 
 #[cfg(all(test, not(feature = "expose-test-schema")))]
 mod tests;
